@@ -1,0 +1,306 @@
+#get the total number of users
+query totalUsers {
+  totalUsers
+}
+
+query allUsers{
+  #selection set
+  totalUsers
+  users {
+    #fields
+    id
+    firstName
+    lastName
+    email
+  }
+}
+
+#nested query
+query projects {
+  projects{
+    id
+    name
+    description
+    isActive
+    bugs {
+      id
+      title
+      description
+      severity
+      status
+    }
+  }
+}
+
+#using arguments
+query getOneUser{
+  user(id : "user-1"){
+    id
+    firstName
+    lastName
+    email
+  }
+}
+
+#using alias
+query getOneUserWithAlias{
+  appUser : user(id : "user-1"){
+    id
+    fName : firstName
+    lName : lastName
+    fullName
+    email
+  }
+}
+
+
+#using variables
+query getOneUserWithVariables($userId : ID!){
+  appUser : user(id : $userId){
+    __typename
+    id
+    fName : firstName
+    lName : lastName
+    fullName
+    email
+  }
+}
+
+#querying connected data
+query project2 {
+  project(id : "project-2"){
+    id
+    name
+    description
+    isActive
+    bugs(status : OPEN) {
+      id
+      title
+      description
+      severity
+      status
+      createdBy{
+        id
+        fullName
+      }
+    }
+  }
+}
+
+#using fragments
+query allProject {
+  projects{
+    id
+    name
+    description
+    isActive
+    bugs {
+      ...bugDetails
+    }
+  }
+}
+
+query project2WithFragment($bugStatus : Status) {
+  project(id : "project-2"){
+    id
+    name
+    description
+    isActive
+    ...openBugDetails
+  }
+}
+
+fragment bugDetails on Bug{
+  id
+  title
+  description
+  severity
+  status
+  createdBy{
+    id
+    fullName
+  }
+}
+
+fragment openBugDetails on Project{
+   bugs(status : $bugStatus) {
+      ...bugDetails
+   }
+}
+
+#mutation
+#creating a new user
+
+mutation createNewUser{
+  createUser(firstName: "Magesh", lastName : "Kuppan", email : "mageshk@mail.com"){
+    id
+    firstName
+    lastName
+    email
+    fullName
+  }
+}
+
+
+#creating a new project
+mutation createNewProject{
+  createProject(project : { 
+    name : "Bug Tracker", 
+    description : "An application to track bugs",
+    isActive : true
+  }){
+    id
+    name
+    description
+    bugs{
+      ...bugDetails
+    }
+  }
+}
+
+#creating a new bug (project-5)
+mutation createNewBug{
+  createBug(bug : {
+    title : "Validation errors",
+    description : "Data is not validated properly",
+    severity : MAJOR,
+    projectId : "project-5",
+    userId : "user-1"
+  }){
+    ...bugDetails
+    actions{
+      id
+      date
+      __typename
+    }
+  }
+}
+
+#fix a bug
+mutation fixABug{
+  fixBug(fixInfo : {
+    bugId : "bug-6",
+    fixedBy : "user-1",
+    solution : "rollback the git commit"
+  }){
+    id
+  }
+}
+
+
+#comment on a bug
+mutation commentABug{
+  commentBug(commentInfo : {
+    bugId : "bug-6",
+    commentedBy : "user-1",
+    comment : "Good job!"
+  }) {
+    id
+  }
+}
+
+#close a bug
+mutation closeABug{
+  closeBug(closeBugInfo : {
+    bugId : "bug-6",
+    closedBy : "user-1",
+    reason : "Test results are positive"
+  }){
+    id
+  }
+}
+
+
+query allBugs{
+  bugs{
+    id
+    actions{
+      id
+      date
+      __typename
+    }
+  }
+}
+
+fragment userDetails on User{
+  id
+  fullName
+  email
+}
+
+
+#using inline fragments (resolving interfaces)
+query bug6Details {
+  bug(id : "bug-6"){
+    ...bugDetails
+    actions{
+      id
+      date
+      ... on OpenAction{
+        __typename
+        openedBy{
+          ...userDetails
+        }
+        description
+      }
+      ... on CommentAction{
+        __typename
+        commentedBy {
+          ...userDetails
+        }
+        comment
+      }
+      ... on FixAction{
+        __typename
+        fixedBy {
+          ...userDetails
+        }
+        solution
+      }
+      ... on CloseAction{
+        __typename
+        closedBy {
+          ...userDetails
+        }
+        reason
+      }
+    }
+  }
+}
+
+#using directives
+query project5 ($includeBugDetails : Boolean!){
+  project(id : "project-5"){
+    id
+    name
+    description @include(if : $includeBugDetails)
+    isActive
+    bugs @include(if : $includeBugDetails) {
+      ...bugDetails
+    }
+  }
+}
+
+#interospection queries
+query interospection{
+  __schema {
+    types{
+      name
+      kind
+      description
+      fields{
+        name
+        description
+        type{
+          name
+          kind
+        }
+			}
+      possibleTypes{
+        name
+      }
+    }
+  }
+  
+}
+
