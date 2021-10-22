@@ -1,0 +1,83 @@
+Magesh Kuppan
+
+GraphQL - 1 Day
+React & Relay - 2 Days
+
+Methodology
+    - No powerpoints
+
+Schedule:
+    Session - 1 : 1:30 Hrs
+    Tea Break : 15 mins
+    Session - 2 : 1:30 Hrs
+    Lunch Break : 45 mins
+    Session - 3 : 1:30 Hrs
+    Tea Break : 15 mins
+    Session - 4 : 1:30 Hrs
+
+About You:
+    Name
+    Primary Skillset
+    Experience in GraphQL (if any)
+
+What is GraphQL?
+    Query Language
+        flexible Api
+
+
+Data
+    Persistance
+        Integrity (Transactional)
+            Relational DBMS
+                Normalise
+
+    Transfer
+        XML
+        JSON
+
+    Usage
+
+Scalar Types
+    String
+    Int
+    Float
+    Boolean
+    ID
+Object Type
+List Type
+Query Type
+Mutation Type
+
+
+Server
+    Using Languages & Frameworks
+    Products
+        Hasura
+
+Client
+    httpClient (axios, fetch)
+    Libraries & Frameworks
+        Apollo Client
+        Relay
+
+http://myapi.com/products/101
+
+Types
+    User
+    Projects
+    Bugs
+    Actions
+
+
+npm install
+npm start
+
+Queries
+#get the total number of users
+query {
+  totalUsers
+}
+
+
+select id, firstName, lastName, email from users;
+select * from users

@@ -16,6 +16,7 @@ type User {
 
   """The email of the user"""
   email: String!
+  fullName: String!
 }
 
 enum Severity {

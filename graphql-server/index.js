@@ -41,6 +41,12 @@ const User = new GraphQLObjectType({
         email: {
             type: GraphQLNonNull(GraphQLString),
             description: 'The email of the user'
+        },
+        fullName : {
+            type: GraphQLNonNull(GraphQLString),
+            resolve : (user) => {
+                return `${user.firstName} ${user.lastName}`
+            }
         }
     }
 });
