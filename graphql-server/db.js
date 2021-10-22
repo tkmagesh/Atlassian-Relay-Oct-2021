@@ -37,7 +37,7 @@ casual.define('bug', function(idx){
         title : casual.title,
         description: casual.description,
         severity : casual.random_element([0,1,2,3]),
-        createdBy : `user-${casual.integer(0, userCount)}`,
+        createdBy : `user-${casual.integer(1, userCount)}`,
         status : casual.random_element([0,1,2]),
         projectId : `project-${casual.integer(0, projectsCount)}`,
     }
@@ -173,5 +173,7 @@ const db = {
     closeBug : closeBug,
     commentBug : commentBug,
 }
+
+
 
 module.exports = db;

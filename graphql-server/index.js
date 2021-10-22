@@ -19,6 +19,7 @@ const {
 const {graphqlHTTP} = require('express-graphql');
 
 const db = require('./db');
+const { resolve } = require('path');
 
 const app = express()
 
@@ -164,7 +165,12 @@ const Bug = new GraphQLObjectType({
         title : {type: GraphQLNonNull(GraphQLString)},
         description: {type: GraphQLNonNull(GraphQLString)},
         severity : {type: GraphQLNonNull(Severity)},
-        createdBy : { type : User},
+        createdBy : { 
+            type : User,
+            resolve : (parent, args) => {
+                return db.nodes.users[parent.createdBy];
+            }
+        },
         status : { type : Status },
         projectId : { type: GraphQLNonNull(GraphQLID)},
         actions : { 
