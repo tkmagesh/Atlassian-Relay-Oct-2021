@@ -192,7 +192,13 @@ const Project = new GraphQLObjectType({
         isActive : {type: GraphQLNonNull(GraphQLBoolean)},
         bugs : {
             type : new GraphQLList(new GraphQLNonNull(Bug)),
+            args : {
+                status : {type: Status}
+            },
             resolve(parent, args){
+                if (typeof args.status !== 'undefined') {
+                    return db.bugs().filter(bug => bug.projectId === parent.id && bug.status === args.status);
+                }
                 return db.bugs().filter(bug => bug.projectId === parent.id);
             }
         },

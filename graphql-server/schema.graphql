@@ -87,7 +87,7 @@ type Project {
   name: String!
   description: String!
   isActive: Boolean!
-  bugs: [Bug!]
+  bugs(status: Status): [Bug!]
 }
 
 type RootQuery {
