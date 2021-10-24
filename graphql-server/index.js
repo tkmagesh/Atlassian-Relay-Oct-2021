@@ -259,9 +259,7 @@ var queryType = new GraphQLObjectType({
         bugs: {
             type: new GraphQLList(Bug),
             resolve(parentValue, args) {
-                console.log('parentValue = ', parentValue);
                 return db.bugs()
-                
             }
         },
 

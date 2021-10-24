@@ -81,3 +81,15 @@ query {
 
 select id, firstName, lastName, email from users;
 select * from users
+
+
+fetch on render
+    fetch
+    render
+
+fetch then render
+
+render as you fetch
+    start fetching
+    start rendering
+
