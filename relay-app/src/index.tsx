@@ -2,7 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 /* import App from './App'; */
-import App from './FetchAsYouRender/App'
+/* import App from './FetchAsYouRender/App' */
+import App from './Fragmented/App';
+
 import reportWebVitals from './reportWebVitals';
 import { RelayEnvironmentProvider } from 'react-relay/hooks';
 import environment from './RelayEnvironment';

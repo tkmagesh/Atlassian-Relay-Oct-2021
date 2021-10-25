@@ -4,22 +4,20 @@ import { useQueryLoader } from 'react-relay/hooks';
 import logo from './logo.svg';
 import './App.css';
 import Users from './Users';
-import * as AppQuery from './__generated__/AppQuery.graphql'
+import * as AppFragmentedQuery from './__generated__/AppFragmentedQuery.graphql'
 
 const graphql = require('babel-plugin-relay/macro');
 
 function App() {
   
   const appQuery = graphql`
-    query AppQuery  {
+    query AppFragmentedQuery  {
       users {
-        id
-        firstName
-        email
+        ...User_user
       }
     }
   `;
-  const [queryRef, loadQuery, disposeQuery] = useQueryLoader<AppQuery.AppQuery>(appQuery);
+  const [queryRef, loadQuery, disposeQuery] = useQueryLoader<AppFragmentedQuery.AppFragmentedQuery>(appQuery);
   
   const onLoadClick = () => {
     loadQuery({}, { fetchPolicy : 'store-and-network'});
