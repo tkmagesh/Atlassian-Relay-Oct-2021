@@ -93,3 +93,41 @@ render as you fetch
     start fetching
     start rendering
 
+Relay
+    Data Management Framework
+    GraphQL Client
+
+Relay Compiler + Relay Runtime
+Relay Compiler
+    Type Safe
+        flow
+        TypeScript
+
+
+Colocation of UI + Data
+
+fragment{
+    id
+    name
+    email
+}
+
+data.fullName
+
+
+Relay Application
+    Runtime dependencies    
+        react-relay
+        relay-runtime
+
+    Dev dependencies
+        babel-plugin-relay
+        graphql
+        relay-compiler
+        relay-config
+
+To Create a relay application
+    yarn create react-app --template typescript
+    cd react-app
+    yarn add react-relay relay-runtime
+    yarn add --dev babel-plugin-relay graphql relay-compiler relay-config

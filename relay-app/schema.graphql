@@ -1,0 +1,188 @@
+schema {
+  query: RootQuery
+  mutation: Mutations
+}
+
+type User implements Node {
+  """The ID of an object"""
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  fullName: String!
+}
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+enum Severity {
+  LOW
+  MINOR
+  MAJOR
+  CRITICAL
+}
+
+enum Status {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+interface Action {
+  """The ID of an object"""
+  id: ID!
+  date: String!
+  bugId: ID!
+}
+
+type CommentAction implements Action {
+  """The ID of an object"""
+  id: ID!
+  date: String!
+  bugId: ID!
+  commentedBy: User
+  description: String!
+  comment: String!
+}
+
+type OpenAction implements Action {
+  """The ID of an object"""
+  id: ID!
+  date: String!
+  bugId: ID!
+  openedBy: User
+  description: String!
+}
+
+type FixAction implements Action {
+  """The ID of an object"""
+  id: ID!
+  date: String!
+  bugId: ID!
+  fixedBy: User
+  solution: String!
+}
+
+type CloseAction implements Action {
+  """The ID of an object"""
+  id: ID!
+  date: String!
+  bugId: ID!
+  closedBy: User
+  reason: String!
+}
+
+type Bug {
+  """The ID of an object"""
+  id: ID!
+  title: String!
+  description: String!
+  severity: Severity!
+  createdBy: User
+  status: Status
+  projectId: ID!
+  actions: [Action]
+}
+
+type Project {
+  """The ID of an object"""
+  id: ID!
+  name: String!
+  description: String!
+  isActive: Boolean!
+  bugs(status: Status): [Bug!]
+}
+
+type RootQuery {
+  """Fetches an object given its ID"""
+  node(
+    """The ID of an object"""
+    id: ID!
+  ): Node
+  totalUsers: Int
+  user(id: ID!): User
+  users: [User!]!
+  project(id: ID!): Project
+  projects: [Project]
+  bug(id: ID!): Bug
+  bugs: [Bug]
+  openBugs(projectId: ID!): [Bug]
+  action(id: ID!): Action
+  actions(bugId: ID!): [Action]
+}
+
+type Mutations {
+  createUser(input: CreateUserInput!): CreateUserPayload
+  createProject(input: CreateProjectInput!): CreateProjectPayload
+  createBug(input: CreateBugInput!): CreateBugPayload
+  fixBug(fixInfo: FixBugInput): Bug
+  closeBug(closeBugInfo: CloseBugInput): Bug
+  commentBug(commentInfo: CommentBugInput): Bug
+}
+
+type CreateUserPayload {
+  user: User
+  clientMutationId: String
+}
+
+input CreateUserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  clientMutationId: String
+}
+
+type CreateProjectPayload {
+  project: Project
+  clientMutationId: String
+}
+
+input CreateProjectInput {
+  project: ProjectInput
+  clientMutationId: String
+}
+
+input ProjectInput {
+  name: String!
+  description: String!
+  isActive: Boolean!
+}
+
+type CreateBugPayload {
+  bug: Bug
+  clientMutationId: String
+}
+
+input CreateBugInput {
+  bug: BugInput
+  clientMutationId: String
+}
+
+input BugInput {
+  title: String!
+  description: String!
+  severity: Severity!
+  projectId: ID!
+  userId: ID!
+}
+
+input FixBugInput {
+  bugId: ID!
+  fixedBy: ID!
+  solution: String!
+}
+
+input CloseBugInput {
+  bugId: ID!
+  closedBy: ID!
+  reason: String!
+}
+
+input CommentBugInput {
+  bugId: ID!
+  commentedBy: ID!
+  comment: String!
+}
