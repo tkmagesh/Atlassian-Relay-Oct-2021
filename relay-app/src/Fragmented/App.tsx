@@ -15,6 +15,9 @@ function App() {
       users {
         ...User_user
       }
+      projects {
+        
+      }
     }
   `;
   const [queryRef, loadQuery, disposeQuery] = useQueryLoader<AppFragmentedQuery.AppFragmentedQuery>(appQuery);

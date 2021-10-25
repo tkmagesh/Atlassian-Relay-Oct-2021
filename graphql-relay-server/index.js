@@ -508,6 +508,11 @@ app.use((req, res, next) => {
     }, 3000);
 })
 
+app.use('/nodes', (req, res, next) => {
+    res.send(JSON.stringify(db.nodes));
+    next()
+})
+
 app.use('/graphql', graphqlHTTP({
     schema,
     graphiql : true,
