@@ -154,3 +154,10 @@ Project
 
 TODO
     display the projects in the 'Projects' component
+
+fetch On Render
+    useLazyLoadQuery
+
+Render as you Fetch
+    useQueryLoader
+    usePreloadedQuery
