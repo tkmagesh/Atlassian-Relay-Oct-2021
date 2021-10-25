@@ -150,3 +150,7 @@ Project{
 Bug
 Project
     refernce to bug
+
+
+TODO
+    display the projects in the 'Projects' component

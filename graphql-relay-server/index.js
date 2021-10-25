@@ -502,11 +502,11 @@ const schema = new GraphQLSchema({
 
 fs.writeFileSync('./schema.graphql', printSchema(schema));
 
-/* app.use((req, res, next) => {
+app.use((req, res, next) => {
     setTimeout(() => {
         next();
     }, 3000);
-}) */
+})
 
 app.use('/graphql', graphqlHTTP({
     schema,
