@@ -131,6 +131,7 @@ To Create a relay application
     cd react-app
     yarn add react-relay relay-runtime
     yarn add --dev babel-plugin-relay graphql relay-compiler relay-config
+    yarn add -D  @types/react-relay
 
 GraphQL server has to be relay complaint
     Every entity must have an unique id
