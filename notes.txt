@@ -131,3 +131,21 @@ To Create a relay application
     cd react-app
     yarn add react-relay relay-runtime
     yarn add --dev babel-plugin-relay graphql relay-compiler relay-config
+
+GraphQL server has to be relay complaint
+    Every entity must have an unique id
+
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+All the entities must implement the Node interface
+
+Project{
+    bug Bug
+}
+
+Bug
+Project
+    refernce to bug
