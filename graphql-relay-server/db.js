@@ -79,6 +79,10 @@ function createActions(){
         const bug = nodes['bugs'][bugKey]
         openBug({bugId: bug.id, openedBy: bug.createdBy})
         commentBug({bugId: bug.id, commentedBy: `user-${casual.random_element([1,2,3,4])}`, comment: casual.description})
+        commentBug({bugId: bug.id, commentedBy: `user-${casual.random_element([1,2,3,4])}`, comment: casual.description})
+        commentBug({bugId: bug.id, commentedBy: `user-${casual.random_element([1,2,3,4])}`, comment: casual.description})
+        commentBug({bugId: bug.id, commentedBy: `user-${casual.random_element([1,2,3,4])}`, comment: casual.description})
+        commentBug({bugId: bug.id, commentedBy: `user-${casual.random_element([1,2,3,4])}`, comment: casual.description})
         fixBug({bugId: bug.id, fixedBy: `user-${casual.random_element([1,2,3,4])}`, solution: casual.description})
         //closeBug({bugId: bug.id, closedBy: `user-${casual.random_element([1,2,3,4])}`, reason: casual.description}) 
     }
@@ -141,6 +145,7 @@ function openBug({bugId, openedBy}){
         bugId : bugId,
     }
     nodes['actions'][newAction.id] = newAction
+    return newAction;
 }
 
 function fixBug({bugId, fixedBy, solution}){
@@ -153,7 +158,7 @@ function fixBug({bugId, fixedBy, solution}){
         bugId : bugId,
     }
     nodes['actions'][newAction.id] = newAction
-    return nodes['bugs'][bugId]
+    return newAction;
 }
 
 function closeBug({bugId, closedBy, reason}){
@@ -168,7 +173,7 @@ function closeBug({bugId, closedBy, reason}){
     nodes['actions'][newAction.id] = newAction
     const bug = nodes['bugs'][bugId]
     bug.status = 2
-    return bug
+    new newAction
 }
 
 function commentBug({bugId, commentedBy, comment}){
@@ -182,7 +187,8 @@ function commentBug({bugId, commentedBy, comment}){
     }
     nodes['actions'][newAction.id] = newAction
     const bug = nodes['bugs'][bugId]
-    return bug
+    return newAction;
+    //return bug
 }
 
 const db = {

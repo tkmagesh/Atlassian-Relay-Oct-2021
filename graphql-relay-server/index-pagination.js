@@ -1,6 +1,13 @@
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors')
+const ws = require('ws')
+const { useServer } = require('graphql-ws/lib/use/ws');
+const { execute, subscribe } = require('graphql');
+
+const { PubSub } = require('graphql-subscriptions')
+const pubsub = new PubSub()
+
 const {
     GraphQLObjectType,
     GraphQLString,
@@ -16,8 +23,19 @@ const {
     GraphQLInputObjectType
 } = require('graphql');
 
-const { nodeDefinitions, fromGlobalId, globalIdField, mutationWithClientMutationId } = require('graphql-relay')
-const { nodeInterface, nodeField } = nodeDefinitions(
+const { 
+    nodeDefinitions, 
+    fromGlobalId, 
+    toGlobalId, 
+    globalIdField, 
+    mutationWithClientMutationId,
+    connectionArgs,
+    connectionDefinitions, 
+    connectionFromArray 
+} = require('graphql-relay');
+
+
+const { nodeInterface, nodeField, nodesField } = nodeDefinitions(
     (globalId) => {
         const { type, id } = fromGlobalId(globalId);
         const slug = `${type.toLowerCase()}s`
@@ -80,9 +98,12 @@ const Status = new GraphQLEnumType({
 const Action = new GraphQLInterfaceType({
     name: 'Action',
     fields: {
-        id: globalIdField(),
+        id: globalIdField('Action'),
         date : { type : GraphQLNonNull(GraphQLString)},
-        bugId : { type : GraphQLNonNull(GraphQLID)},
+        bugId : { 
+            type : GraphQLNonNull(GraphQLID)
+        }
+        ,
     },
     resolveType : (obj) => {
         if (obj.comment) return CommentAction;
@@ -97,9 +118,14 @@ const CommentAction = new GraphQLObjectType({
     name: 'CommentAction',
     interfaces : [Action],
     fields: {
-        id: globalIdField(),
+        id: globalIdField('CommentAction'),
         date : { type : GraphQLNonNull(GraphQLString)},
-        bugId : { type : GraphQLNonNull(GraphQLID)},
+        bugId : { 
+            type: GraphQLNonNull(GraphQLID),
+            resolve : (obj) => {
+                return toGlobalId('Bug', obj.bugId)
+            }
+        },
         commentedBy : { 
             type : User,
             resolve : (parent, args) => {
@@ -116,9 +142,14 @@ const OpenAction = new GraphQLObjectType({
     name: 'OpenAction',
     interfaces : [Action],
     fields: {
-        id: globalIdField(),
+        id: globalIdField('OpenAction'),
         date : { type : GraphQLNonNull(GraphQLString)},
-        bugId : { type : GraphQLNonNull(GraphQLID)},
+        bugId : { 
+            type: GraphQLNonNull(GraphQLID),
+            resolve : (obj) => {
+                return toGlobalId('Bug', obj.bugId)
+            }
+        },
         openedBy : { 
             type : User,
             resolve : (parent, args) => {
@@ -134,9 +165,14 @@ const FixAction = new GraphQLObjectType({
     name: 'FixAction',
     interfaces : [Action],
     fields: {
-        id: globalIdField(),
+        id: globalIdField('FixAction'),
         date : { type : GraphQLNonNull(GraphQLString)},
-        bugId : { type : GraphQLNonNull(GraphQLID)},
+       bugId : { 
+            type: GraphQLNonNull(GraphQLID),
+            resolve : (obj) => {
+                return toGlobalId('Bug', obj.bugId)
+            }
+        },
         fixedBy : { 
             type : User, 
             resolve : (parent, args) => {
@@ -151,9 +187,14 @@ const CloseAction = new GraphQLObjectType({
     name: 'CloseAction',
     interfaces : [Action],
     fields: {
-        id: globalIdField(),
+        id: globalIdField('CloseAction'),
         date : { type : GraphQLNonNull(GraphQLString)},
-        bugId : { type : GraphQLNonNull(GraphQLID)},
+        bugId : { 
+            type: GraphQLNonNull(GraphQLID),
+            resolve : (obj) => {
+                return toGlobalId('Bug', obj.bugId)
+            }
+        },
         closedBy : { 
             type : User, 
             resolve : (parent, args) => {
@@ -162,6 +203,11 @@ const CloseAction = new GraphQLObjectType({
         reason : { type : GraphQLNonNull(GraphQLString)},
     },
     interfaces: [Action, nodeInterface]
+});
+
+const actionConnection = connectionDefinitions({ 
+    name : 'Action',
+    nodeType : Action 
 });
 
 const Bug = new GraphQLObjectType({
@@ -178,38 +224,44 @@ const Bug = new GraphQLObjectType({
             }
         },
         status : { type : Status },
-        projectId : { type: GraphQLNonNull(GraphQLID)},
-        actions : { 
-            type : GraphQLList(Action),
-            resolve(parent, args){
-                const actions = db.actions().filter(action => action.bugId === parent.id);
-                console.log(actions);
-                return actions;
+        projectId : { 
+            type : GraphQLID,
+            resolve : (parent, args) => {
+                return toGlobalId('Project', parent.projectId);
             }
         },
+        actions: {
+            type: actionConnection.connectionType,
+            args: connectionArgs,
+            resolve(parent, args) {
+                const actions = db.actions().filter(action => action.bugId === parent.id);
+                return connectionFromArray(actions, args)                
+            }
+        }
+        
     },
     interfaces: [nodeInterface]
+});
+
+const bugConnection = connectionDefinitions({ 
+    name : 'Bug',
+    nodeType : Bug 
 });
 
 const Project = new GraphQLObjectType({
     name: 'Project',
     fields: {
-        id: globalIdField(),
+        id: globalIdField('Project'),
         name : {type: GraphQLNonNull(GraphQLString)},
         description: {type: GraphQLNonNull(GraphQLString)},
         isActive : {type: GraphQLNonNull(GraphQLBoolean)},
-        bugs : {
-            type : new GraphQLList(new GraphQLNonNull(Bug)),
-            args : {
-                status : {type: Status}
-            },
-            resolve(parent, args){
-                if (typeof args.status !== 'undefined') {
-                    return db.bugs().filter(bug => bug.projectId === parent.id && bug.status === args.status);
-                }
-                return db.bugs().filter(bug => bug.projectId === parent.id);
+        bugs: {
+            type: bugConnection.connectionType,
+            args: connectionArgs,
+            resolve(parent, args) {
+                return connectionFromArray(db.bugs().filter(bug => bug.projectId === parent.id), args)                
             }
-        },
+        }
     },
     interfaces: [nodeInterface]
 });
@@ -218,6 +270,7 @@ var queryType = new GraphQLObjectType({
     name: 'RootQuery',
     fields: {
         node : nodeField,
+        nodes : nodesField,
         totalUsers : {
             type : GraphQLInt,
             resolve(parent, args){
@@ -245,7 +298,8 @@ var queryType = new GraphQLObjectType({
                 id: {type: GraphQLNonNull(GraphQLID)}
             },
             resolve(parentValue, args) {
-                return db.projects().find(project => project.id === args.id);
+                const projectId = fromGlobalId(args.id).id;
+                return db.projects().find(project => project.id === projectId);
             }
         },
         projects: {
@@ -260,40 +314,52 @@ var queryType = new GraphQLObjectType({
                 id: {type: GraphQLNonNull(GraphQLID)}
             },
             resolve(parentValue, args) {
-                return db.bugs().find(bug => bug.id === args.id);
+                return db.bugs().find(bug => bug.id === fromGlobalId(args.id).id);
             }
         },
         bugs: {
-            type: new GraphQLNonNull(GraphQLList(Bug)),
+            type: bugConnection.connectionType,
+            args: {
+                ...connectionArgs,
+                status : { type : Status }
+            },
             resolve(parentValue, args) {
-                return db.bugs()                
+                if (args.hasOwnProperty('status')) {
+                    const filteredBugs = db.bugs().filter(bug => bug.status === args.status);
+                    return connectionFromArray(filteredBugs, args)
+                } else {
+                    const filteredBugs = db.bugs();
+                    return connectionFromArray(filteredBugs, args)
+                }
             }
         },
         openBugs: {
-            type: new GraphQLNonNull(GraphQLList(Bug)),
+            type: bugConnection.connectionType,
             args: {
+                ...connectionArgs,
                 projectId: {type: GraphQLNonNull(GraphQLID)}
             },
             resolve(parentValue, args) {
-                return db.bugs().filter(bug => bug.projectId === args.projectId);
+                return connectionFromArray(db.bugs().filter(bug => bug.projectId === args.projectId && bug.status === 0), args);
             }
         },
         action : {
             type: Action,
             args: {
-                id: {type: GraphQLNonNull(GraphQLID)}
+                id: globalIdField('Action')
             },
             resolve(parentValue, args) {
-                return db.actions().find(action => action.bugId === parent.bugId);
+                return db.actions().find(action => action.id === fromGlobalId(args.id).id);
             }
         },
         actions: {
-            type: new GraphQLNonNull(GraphQLList(Action)),
+            type: actionConnection.connectionType,
             args: {
+                ...connectionArgs,
                 bugId: {type: GraphQLNonNull(GraphQLID)}
             },
             resolve(parentValue, args) {
-                return db.actions().filter(action => action.bugId === args.bugId);
+                return connectionFromArray(db.actions().filter(action => action.bugId === fromGlobalId(args.bugId).id), args);
             }
         }
     }
@@ -320,7 +386,7 @@ const BugInput = new GraphQLInputObjectType({
 });
 
 const FixBugInput = new GraphQLInputObjectType({
-    name: 'FixBugInput',
+    name: 'FixInput',
     fields: {
         bugId : { type: GraphQLNonNull(GraphQLID)},
         fixedBy : {type: GraphQLNonNull(GraphQLID)},
@@ -329,7 +395,7 @@ const FixBugInput = new GraphQLInputObjectType({
 });
 
 const CloseBugInput = new GraphQLInputObjectType({
-    name: 'CloseBugInput',
+    name: 'CloseInput',
     fields: {
         bugId : { type: GraphQLNonNull(GraphQLID)},
         closedBy : {type: GraphQLNonNull(GraphQLID)},
@@ -338,7 +404,7 @@ const CloseBugInput = new GraphQLInputObjectType({
 });
 
 const CommentBugInput = new GraphQLInputObjectType({
-    name: 'CommentBugInput',
+    name: 'CommentInput',
     fields: {
         bugId : { type: GraphQLNonNull(GraphQLID)},
         commentedBy : {type: GraphQLNonNull(GraphQLID)},
@@ -349,17 +415,6 @@ const CommentBugInput = new GraphQLInputObjectType({
 const mutationType = new GraphQLObjectType({
     name : 'Mutations',
     fields : {
-        /* createUser : {
-            type : User,
-            args : {
-                firstName : {type : GraphQLNonNull(GraphQLString)},
-                lastName : {type : GraphQLNonNull(GraphQLString)},
-                email : {type : GraphQLNonNull(GraphQLString)}
-            },
-            resolve(parentValue, args){
-                return db.createUser(args.firstName, args.lastName, args.email);
-            }
-        },*/
         createUser : mutationWithClientMutationId({
             name : 'CreateUser',
             inputFields : {
@@ -372,9 +427,9 @@ const mutationType = new GraphQLObjectType({
                     type : User,
                 }
             },
-            mutateAndGetPayload : (args, context) => {
+            mutateAndGetPayload : async (args, context) => {
                 return new Promise((resolve, reject) => {
-                    const newUser = db.createUser(args.firstName, args.lastName, args.email);
+                    const newUser = db.createUser(args.firstName, args.lastName, args.email);    
                     resolve({user : newUser});
                 });
             }
@@ -396,33 +451,36 @@ const mutationType = new GraphQLObjectType({
                 });
             }
         }),
+        
         createBug : mutationWithClientMutationId({
             name : 'CreateBug',
             inputFields : {
                 bug : { type : BugInput}
             },
             outputFields : {
-                bug : {
-                    type : Bug,
+                bugEdge : {
+                    type : bugConnection.edgeType,
                 }
             },
-            mutateAndGetPayload : (args, context) => {
-                return new Promise((resolve, reject) => {
-                    const newBug = db.createBug(args.bug);
-                    resolve({bug : newBug});
-                });
+            mutateAndGetPayload : async (args, context) => {
+                const { title, description, severity } = args.bug;
+                const userId = fromGlobalId(args.bug.userId).id;
+                const projectId = fromGlobalId(args.bug.projectId).id;
+                const newBug = db.createBug({title, description, severity, projectId, userId});
+                const payload = {
+                    bugEdge :{
+                        cursor : toGlobalId('Bug', newBug.id),
+                        node : newBug
+                    }
+                }
+               await pubsub.publish(
+                    'BUG_NEW'
+                    , { newBug: newBug }
+                );
+                return payload;
             }
         }),
-        fixBug : {
-            type : Bug,
-            args : {
-                fixInfo : { type : FixBugInput}
-            },
-            resolve(parentValue, args){
-                return db.fixBug(args.fixInfo);
-            }
-        },
-        /* fixBug : mutationWithClientMutationId({
+        fixBug : mutationWithClientMutationId({
             name : 'FixBug',
             inputFields : {
                 fixInfo : { 
@@ -430,55 +488,52 @@ const mutationType = new GraphQLObjectType({
                 }
             },
             outputFields : {
-                bug : {
-                    type : Bug,
+                actionEdge : {
+                    type : actionConnection.edgeType,
                 }
             },
             mutateAndGetPayload : (args, context) => {
-                return new Promise((resolve, reject) => {
-                    const updatedBug = db.fixBug(args.fixInfo);
-                    resolve({bug : updatedBug});
-                });
+                const fixedBy = fromGlobalId(args.fixInfo.fixedBy).id;
+                const bugId = fromGlobalId(args.fixInfo.bugId).id;
+                const solution = args.fixInfo.solution;
+                const action = db.fixBug({fixedBy, bugId, solution});
+                const payload = {
+                    actionEdge :{
+                        cursor : toGlobalId('Action', action.id),
+                        node : action
+                    }
+                }
+                return payload;
+                
             }
-        }), */
-        closeBug : {
-            type : Bug,
-            args : {
-                closeBugInfo : { type : CloseBugInput}
-            },
-            resolve(parentValue, args){
-                return db.closeBug(args.closeBugInfo);
-            }
-        },
-        /* closeBug : mutationWithClientMutationId({
+        }),
+        closeBug : mutationWithClientMutationId({
             name : 'CloseBug',
             inputFields : {
-                fixInfo : { 
+                closeInfo : { 
                     type : CloseBugInput
                 }
             },
             outputFields : {
-                bug : {
-                    type : Bug,
+                actionEdge : {
+                    type : actionConnection.edgeType,
                 }
             },
             mutateAndGetPayload : (args, context) => {
-                return new Promise((resolve, reject) => {
-                    const updatedBug = db.closeBug(args.fixInfo);
-                    resolve({bug : updatedBug});
-                });
+                const closedBy = fromGlobalId(args.closeInfo.closedBy).id;
+                const bugId = fromGlobalId(args.closeInfo.bugId).id;
+                const reason = args.closeInfo.reason;
+                const action = db.closeBug({closedBy, bugId, reason});
+                 const payload = {
+                    actionEdge :{
+                        cursor : toGlobalId('Action', action.id),
+                        node : action
+                    }
+                }
+                return payload;
             }
-        }), */
-        commentBug : {
-            type : Bug,
-            args : {
-                commentInfo : { type : CommentBugInput}
-            },
-            resolve(parentValue, args){
-                return db.commentBug(args.commentInfo);
-            }
-        },
-        /* commentBug : mutationWithClientMutationId({
+        }),
+        commentBug : mutationWithClientMutationId({
             name : 'CommentBug',
             inputFields : {
                 commentInfo : { 
@@ -486,34 +541,78 @@ const mutationType = new GraphQLObjectType({
                 }
             },
             outputFields : {
-                bug : {
-                    type : Bug,
+                actionEdge : {
+                    type : actionConnection.edgeType,
                 }
             },
             mutateAndGetPayload : (args, context) => {
-                return new Promise((resolve, reject) => {
-                    const updatedBug = db.commentBug(args.commentInfo);
-                    resolve({bug : updatedBug});
-                });
+                const commentedBy = fromGlobalId(args.commentInfo.commentedBy).id;
+                const bugId = fromGlobalId(args.commentInfo.bugId).id;
+                const comment = args.commentInfo.comment;
+                const action = db.commentBug({commentedBy, bugId, comment});
+                 const payload = {
+                    actionEdge :{
+                        cursor : toGlobalId('Action', action.id),
+                        node : action
+                    }
+                }
+                return payload;
             }
-        }), */
+        }),
     }
+});
+
+/* const NewBugScripttion = subscriptionWithClientId({
+    name : 'NewBug',
+    inputFields : {},
+    outputFields : {
+        bug : {
+            type : Bug,
+            resolve : ({bugId}, args, context) => {
+                console.log('outputFields.bug.resolve triggered')
+                return db.nodes.bugs[bugId];
+            }
+        }
+    },
+    subscribe : (args, context) => {
+        console.log('subscribe triggered')
+        return pubsub.asyncIterator('BUG_NEW');
+    },
+    getPayload : (args, context) => {
+        console.log('getPayload triggered', args)
+        return {
+            id : args.id
+        };
+    }
+})
+*/
+const SubscriptionType = new GraphQLObjectType({
+  name: 'Subscriptions',
+  fields: {
+    NewBug: { 
+        type : Bug,
+         resolve: (source) => {
+            if (source instanceof Error) {
+                throw source;
+            }
+            return source.newBug;
+        },
+        subscribe: async function *(parent, args, context){
+            console.log('Subscription triggered')
+            pubsub.asyncIterator('NEW_BUG')
+        }
+    }
+  }
 });
 
 const schema = new GraphQLSchema({
     query: queryType,
     types :[User, Severity, Status, Action, CommentAction, OpenAction, FixAction, CloseAction, Bug, Project],
-    mutation : mutationType
+    mutation : mutationType,
+    subscription : SubscriptionType
 });
 
 fs.writeFileSync('./schema.graphql', printSchema(schema));
-
-app.use((req, res, next) => {
-    setTimeout(() => {
-        next()
-    }, 3000);
-});
-
 
 app.use('/nodes', (req, res, next) => {
     res.send(JSON.stringify(db.nodes));
@@ -526,6 +625,37 @@ app.use('/graphql', graphqlHTTP({
 
 }));
 
-app.listen(8080, () => {
-    console.log(`GraphQL Server (index.js) running on http://localhost:8080/graphql`)
-}); 
+const server = app.listen(8081, () => {
+    console.log(`GraphQL Server(pagination) running on http://localhost:8081/graphql`)
+    // create and use the websocket server
+    const wsServer = new ws.Server({
+        server,
+        path : '/graphql',
+    });
+
+    useServer(
+        {
+            schema,
+            execute,
+            subscribe,
+            onConnect: (ctx) => {
+                console.log('Connect');
+            },
+            onSubscribe: (ctx, msg) => {
+                console.log('Subscribe');
+            },
+            onNext: (ctx, msg, args, result) => {
+                console.debug('Next');
+            },
+            onError: (ctx, msg, errors) => {
+                console.error('Error');
+            },
+            onComplete: (ctx, msg) => {
+                console.log('Complete');
+            },
+        },
+        wsServer
+    );
+    console.log(`WebSockets listening on ws://localhost:8081/subscriptions`)
+});
+

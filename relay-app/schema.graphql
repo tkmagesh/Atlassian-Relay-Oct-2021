@@ -4,7 +4,9 @@ schema {
 }
 
 type User implements Node {
-  """The ID of an object"""
+  """
+  The ID of an object
+  """
   id: ID!
   firstName: String!
   lastName: String!
@@ -12,9 +14,13 @@ type User implements Node {
   fullName: String!
 }
 
-"""An object with an ID"""
+"""
+An object with an ID
+"""
 interface Node {
-  """The id of the object."""
+  """
+  The id of the object.
+  """
   id: ID!
 }
 
@@ -32,14 +38,18 @@ enum Status {
 }
 
 interface Action {
-  """The ID of an object"""
+  """
+  The ID of an object
+  """
   id: ID!
   date: String!
   bugId: ID!
 }
 
-type CommentAction implements Action {
-  """The ID of an object"""
+type CommentAction implements Action & Node {
+  """
+  The ID of an object
+  """
   id: ID!
   date: String!
   bugId: ID!
@@ -48,8 +58,10 @@ type CommentAction implements Action {
   comment: String!
 }
 
-type OpenAction implements Action {
-  """The ID of an object"""
+type OpenAction implements Action & Node {
+  """
+  The ID of an object
+  """
   id: ID!
   date: String!
   bugId: ID!
@@ -57,8 +69,10 @@ type OpenAction implements Action {
   description: String!
 }
 
-type FixAction implements Action {
-  """The ID of an object"""
+type FixAction implements Action & Node {
+  """
+  The ID of an object
+  """
   id: ID!
   date: String!
   bugId: ID!
@@ -66,8 +80,10 @@ type FixAction implements Action {
   solution: String!
 }
 
-type CloseAction implements Action {
-  """The ID of an object"""
+type CloseAction implements Action & Node {
+  """
+  The ID of an object
+  """
   id: ID!
   date: String!
   bugId: ID!
@@ -75,8 +91,10 @@ type CloseAction implements Action {
   reason: String!
 }
 
-type Bug {
-  """The ID of an object"""
+type Bug implements Node {
+  """
+  The ID of an object
+  """
   id: ID!
   title: String!
   description: String!
@@ -87,8 +105,10 @@ type Bug {
   actions: [Action]
 }
 
-type Project {
-  """The ID of an object"""
+type Project implements Node {
+  """
+  The ID of an object
+  """
   id: ID!
   name: String!
   description: String!
@@ -97,21 +117,25 @@ type Project {
 }
 
 type RootQuery {
-  """Fetches an object given its ID"""
+  """
+  Fetches an object given its ID
+  """
   node(
-    """The ID of an object"""
+    """
+    The ID of an object
+    """
     id: ID!
   ): Node
   totalUsers: Int
   user(id: ID!): User
   users: [User!]!
   project(id: ID!): Project
-  projects: [Project]
+  projects: [Project]!
   bug(id: ID!): Bug
-  bugs: [Bug]
-  openBugs(projectId: ID!): [Bug]
+  bugs: [Bug]!
+  openBugs(projectId: ID!): [Bug]!
   action(id: ID!): Action
-  actions(bugId: ID!): [Action]
+  actions(bugId: ID!): [Action]!
 }
 
 type Mutations {

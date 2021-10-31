@@ -38,7 +38,7 @@ interface Action {
   bugId: ID!
 }
 
-type CommentAction implements Action {
+type CommentAction implements Action & Node {
   """The ID of an object"""
   id: ID!
   date: String!
@@ -48,7 +48,7 @@ type CommentAction implements Action {
   comment: String!
 }
 
-type OpenAction implements Action {
+type OpenAction implements Action & Node {
   """The ID of an object"""
   id: ID!
   date: String!
@@ -57,7 +57,7 @@ type OpenAction implements Action {
   description: String!
 }
 
-type FixAction implements Action {
+type FixAction implements Action & Node {
   """The ID of an object"""
   id: ID!
   date: String!
@@ -66,7 +66,7 @@ type FixAction implements Action {
   solution: String!
 }
 
-type CloseAction implements Action {
+type CloseAction implements Action & Node {
   """The ID of an object"""
   id: ID!
   date: String!
@@ -75,7 +75,7 @@ type CloseAction implements Action {
   reason: String!
 }
 
-type Bug {
+type Bug implements Node {
   """The ID of an object"""
   id: ID!
   title: String!
@@ -87,7 +87,7 @@ type Bug {
   actions: [Action]
 }
 
-type Project {
+type Project implements Node {
   """The ID of an object"""
   id: ID!
   name: String!
@@ -106,12 +106,12 @@ type RootQuery {
   user(id: ID!): User
   users: [User!]!
   project(id: ID!): Project
-  projects: [Project]
+  projects: [Project]!
   bug(id: ID!): Bug
-  bugs: [Bug]
-  openBugs(projectId: ID!): [Bug]
+  bugs: [Bug]!
+  openBugs(projectId: ID!): [Bug]!
   action(id: ID!): Action
-  actions(bugId: ID!): [Action]
+  actions(bugId: ID!): [Action]!
 }
 
 type Mutations {
