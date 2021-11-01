@@ -12,9 +12,13 @@ const App = () => {
                 id
                 firstName
             }
+            projects{
+                id
+            }
             ...Bugs_list
         }
     `, {})
+    console.log(query);
     return (
         <>
         <h3>Bugs</h3>

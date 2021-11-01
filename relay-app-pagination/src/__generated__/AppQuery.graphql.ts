@@ -11,6 +11,9 @@ export type AppQueryResponse = {
         readonly id: string;
         readonly firstName: string;
     }>;
+    readonly projects: ReadonlyArray<{
+        readonly id: string;
+    } | null>;
     readonly " $fragmentRefs": FragmentRefs<"Bugs_list">;
 };
 export type AppQuery = {
@@ -25,6 +28,9 @@ query AppQuery {
   users {
     id
     firstName
+  }
+  projects {
+    id
   }
   ...Bugs_list
 }
@@ -78,7 +84,19 @@ v1 = {
   ],
   "storageKey": null
 },
-v2 = [
+v2 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "Project",
+  "kind": "LinkedField",
+  "name": "projects",
+  "plural": true,
+  "selections": [
+    (v0/*: any*/)
+  ],
+  "storageKey": null
+},
+v3 = [
   {
     "kind": "Literal",
     "name": "first",
@@ -93,6 +111,7 @@ return {
     "name": "AppQuery",
     "selections": [
       (v1/*: any*/),
+      (v2/*: any*/),
       {
         "args": null,
         "kind": "FragmentSpread",
@@ -109,9 +128,10 @@ return {
     "name": "AppQuery",
     "selections": [
       (v1/*: any*/),
+      (v2/*: any*/),
       {
         "alias": null,
-        "args": (v2/*: any*/),
+        "args": (v3/*: any*/),
         "concreteType": "BugConnection",
         "kind": "LinkedField",
         "name": "bugs",
@@ -219,7 +239,7 @@ return {
       },
       {
         "alias": null,
-        "args": (v2/*: any*/),
+        "args": (v3/*: any*/),
         "filters": null,
         "handle": "connection",
         "key": "Bugs_bugs",
@@ -229,14 +249,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "a924e79667ed726bbd54600aead61201",
+    "cacheID": "59522953543141b2e0a1496d38267508",
     "id": null,
     "metadata": {},
     "name": "AppQuery",
     "operationKind": "query",
-    "text": "query AppQuery {\n  users {\n    id\n    firstName\n  }\n  ...Bugs_list\n}\n\nfragment Bugs_list on RootQuery {\n  bugs(first: 2) {\n    edges {\n      node {\n        id\n        title\n        description\n        status\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n}\n"
+    "text": "query AppQuery {\n  users {\n    id\n    firstName\n  }\n  projects {\n    id\n  }\n  ...Bugs_list\n}\n\nfragment Bugs_list on RootQuery {\n  bugs(first: 2) {\n    edges {\n      node {\n        id\n        title\n        description\n        status\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n      hasPreviousPage\n      startCursor\n    }\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = 'f8d6d48da90e2ab4b46fd6934c0a52b9';
+(node as any).hash = '7fb5a0fed21087102e26ffd0c4162d03';
 export default node;
