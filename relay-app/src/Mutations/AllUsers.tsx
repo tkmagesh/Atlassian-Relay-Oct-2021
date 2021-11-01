@@ -1,8 +1,10 @@
 import { useEffect } from "react";
-import { useLazyLoadQuery, useMutation } from "react-relay";
+import { useLazyLoadQuery, useMutation, commitLocalUpdate } from "react-relay";
 import * as AllUsersQuery from './__generated__/AllUsersQuery.graphql';
 import * as AllUsers_createUserMutation from './__generated__/AllUsers_createUserMutation.graphql';
 import { generateUniqueClientID } from 'relay-runtime'
+import environment from '../RelayEnvironment';
+
 const graphql = require('babel-plugin-relay/macro');
 
 const AllUsers = () => {
@@ -54,7 +56,7 @@ const AllUsers = () => {
                 store.getRoot().setLinkedRecords(updatedUsers, 'users')
 
             },
-           /*  updater : store => {
+            updater : store => {
                 window['store'] = store;
                 const root = store.getRoot()
 
@@ -74,13 +76,24 @@ const AllUsers = () => {
                 const newUser = payload.getLinkedRecord('user')
                 const updatedUsers = [...users, newUser]
                 root.setLinkedRecords(updatedUsers, 'users')
-            } */
+            }
         });
+    };
+
+    const onLoginClick = () => {
+        commitLocalUpdate(environment, store => {
+            const record = store.getRoot().getLinkedRecord('userStatus')
+            if (!record) {
+                return
+            }
+            record.setValue(true, 'loggedIn')
+        })
     }
 
     return (
         <div>
             <h1>All Users - [#{data.totalUsers}]</h1>
+            <button onClick={onLoginClick}>Login User</button>
             <button onClick={() => onCreateUserClick()}>Create User</button>
             <ul>
                 {data.users.map(user => (
