@@ -4,7 +4,15 @@
 
 import { ConcreteRequest } from "relay-runtime";
 
-export type AllUsers_createUserMutationVariables = {};
+export type CreateUserInput = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    clientMutationId?: string | null;
+};
+export type AllUsers_createUserMutationVariables = {
+    input: CreateUserInput;
+};
 export type AllUsers_createUserMutationResponse = {
     readonly createUser: {
         readonly user: {
@@ -23,8 +31,10 @@ export type AllUsers_createUserMutation = {
 
 
 /*
-mutation AllUsers_createUserMutation {
-  createUser(input: {firstName: "Magesh", lastName: "K", email: "mk@email.com"}) {
+mutation AllUsers_createUserMutation(
+  $input: CreateUserInput!
+) {
+  createUser(input: $input) {
     user {
       id
       firstName
@@ -38,16 +48,19 @@ mutation AllUsers_createUserMutation {
 const node: ConcreteRequest = (function(){
 var v0 = [
   {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "input"
+  }
+],
+v1 = [
+  {
     "alias": null,
     "args": [
       {
-        "kind": "Literal",
+        "kind": "Variable",
         "name": "input",
-        "value": {
-          "email": "mk@email.com",
-          "firstName": "Magesh",
-          "lastName": "K"
-        }
+        "variableName": "input"
       }
     ],
     "concreteType": "CreateUserPayload",
@@ -95,35 +108,35 @@ var v0 = [
         "storageKey": null
       }
     ],
-    "storageKey": "createUser(input:{\"email\":\"mk@email.com\",\"firstName\":\"Magesh\",\"lastName\":\"K\"})"
+    "storageKey": null
   }
 ];
 return {
   "fragment": {
-    "argumentDefinitions": [],
+    "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
     "name": "AllUsers_createUserMutation",
-    "selections": (v0/*: any*/),
+    "selections": (v1/*: any*/),
     "type": "Mutations",
     "abstractKey": null
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": [],
+    "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "AllUsers_createUserMutation",
-    "selections": (v0/*: any*/)
+    "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "feb3e76814d0b06edc34cc9a4b9fe605",
+    "cacheID": "e18057f6e45dc1378b73377b73a4f01d",
     "id": null,
     "metadata": {},
     "name": "AllUsers_createUserMutation",
     "operationKind": "mutation",
-    "text": "mutation AllUsers_createUserMutation {\n  createUser(input: {firstName: \"Magesh\", lastName: \"K\", email: \"mk@email.com\"}) {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n}\n"
+    "text": "mutation AllUsers_createUserMutation(\n  $input: CreateUserInput!\n) {\n  createUser(input: $input) {\n    user {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '9669cb5d3e60595d9c5585bdfe355329';
+(node as any).hash = '9dc00880f6843d79e4df1fb00804b6ac';
 export default node;

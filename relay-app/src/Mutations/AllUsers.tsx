@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLazyLoadQuery, useMutation, commitLocalUpdate } from "react-relay";
 import * as AllUsersQuery from './__generated__/AllUsersQuery.graphql';
 import * as AllUsers_createUserMutation from './__generated__/AllUsers_createUserMutation.graphql';
@@ -8,6 +8,9 @@ import environment from '../RelayEnvironment';
 const graphql = require('babel-plugin-relay/macro');
 
 const AllUsers = () => {
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
     const data = useLazyLoadQuery<AllUsersQuery.AllUsersQuery>(graphql`
         query AllUsersQuery {
             totalUsers
@@ -20,13 +23,11 @@ const AllUsers = () => {
         }
     `, {})
 
-    const [ createUser ] = useMutation(graphql`
-    mutation AllUsers_createUserMutation{
-        createUser(input : {
-            firstName : "Magesh",
-            lastName : "K",
-            email : "mk@email.com"
-        }){
+    
+
+    const [ createUser ] = useMutation<AllUsers_createUserMutation.AllUsers_createUserMutation>(graphql`
+    mutation AllUsers_createUserMutation($input: CreateUserInput!) {
+        createUser(input : $input) {
             user{
             id
             firstName
@@ -38,12 +39,19 @@ const AllUsers = () => {
     `)
 
     const onCreateUserClick = () => {
+        const user : AllUsers_createUserMutation.CreateUserInput = {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+        }
         createUser({
-            variables : {},
+            variables : {
+                "input" : user
+            },
             optimisticUpdater : (store) => {
                 const newUserId = generateUniqueClientID()
                 const newUser = store.create(newUserId, 'User')
-                newUser.setValue('id', newUserId)
+                newUser.setValue(newUserId, 'id')
                 newUser.setValue('First Name', 'firstName')
                 newUser.setValue('Last Name', 'lastName')
                 newUser.setValue('Email', 'email')
@@ -89,15 +97,15 @@ const AllUsers = () => {
             record.setValue(true, 'loggedIn')
         })
     }
-
+    
     return (
         <div>
             <h1>All Users - [#{data.totalUsers}]</h1>
             <button onClick={onLoginClick}>Login User</button>
             <div>
-                <input type="text" placeholder="FirstName"/>
-                <input type="text" placeholder="LastName"/>
-                <input type="text" placeholder="Email"/>
+                <input type="text" placeholder="FirstName" onChange = { evt => setFirstName(evt.target.value) }/>
+                <input type="text" placeholder="LastName" onChange = { evt => setLastName(evt.target.value) }/>
+                <input type="text" placeholder="Email" onChange = { evt => setEmail(evt.target.value) }/>
                 <button onClick={() => onCreateUserClick()}>Create User</button>
             </div>
             <ul>
