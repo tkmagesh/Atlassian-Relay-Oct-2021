@@ -625,8 +625,8 @@ app.use('/graphql', graphqlHTTP({
 
 }));
 
-const server = app.listen(8081, () => {
-    console.log(`GraphQL Server(pagination) running on http://localhost:8081/graphql`)
+const server = app.listen(8080, () => {
+    console.log(`GraphQL Server(pagination) running on http://localhost:8080/graphql`)
     // create and use the websocket server
     const wsServer = new ws.Server({
         server,
@@ -656,6 +656,6 @@ const server = app.listen(8081, () => {
         },
         wsServer
     );
-    console.log(`WebSockets listening on ws://localhost:8081/subscriptions`)
+    console.log(`WebSockets listening on ws://localhost:8080/subscriptions`)
 });
 
