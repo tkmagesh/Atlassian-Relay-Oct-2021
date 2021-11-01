@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLazyLoadQuery, useMutation } from "react-relay";
 import * as AllUsersQuery from './__generated__/AllUsersQuery.graphql';
 import * as AllUsers_createUserMutation from './__generated__/AllUsers_createUserMutation.graphql';
-
+import { generateUniqueClientID } from 'relay-runtime'
 const graphql = require('babel-plugin-relay/macro');
 
 const AllUsers = () => {
@@ -38,7 +38,24 @@ const AllUsers = () => {
     const onCreateUserClick = () => {
         createUser({
             variables : {},
-            updater : store => {
+            optimisticUpdater : (store) => {
+                const newUserId = generateUniqueClientID()
+                const newUser = store.create(newUserId, 'User')
+                newUser.setValue('id', newUserId)
+                newUser.setValue('First Name', 'firstName')
+                newUser.setValue('Last Name', 'lastName')
+                newUser.setValue('Email', 'email')
+
+                const users = store.getRoot().getLinkedRecords('users')
+                if (!users){
+                    return
+                }
+                const updatedUsers = [...users, newUser]
+                store.getRoot().setLinkedRecords(updatedUsers, 'users')
+
+            },
+           /*  updater : store => {
+                window['store'] = store;
                 const root = store.getRoot()
 
                 //updating the total users
@@ -57,7 +74,7 @@ const AllUsers = () => {
                 const newUser = payload.getLinkedRecord('user')
                 const updatedUsers = [...users, newUser]
                 root.setLinkedRecords(updatedUsers, 'users')
-            }
+            } */
         });
     }
 

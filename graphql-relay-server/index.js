@@ -511,7 +511,7 @@ fs.writeFileSync('./schema.graphql', printSchema(schema));
 app.use((req, res, next) => {
     setTimeout(() => {
         next()
-    }, 0);
+    }, 3000);
 });
 
 
