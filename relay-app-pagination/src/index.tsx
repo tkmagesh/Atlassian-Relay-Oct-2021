@@ -9,7 +9,7 @@ import reportWebVitals from './reportWebVitals';
 import { RelayEnvironmentProvider } from 'react-relay/hooks';
 import environment from './RelayEnvironment';
 import App from './App'
-
+import Root from './Root';
 declare global{
   interface Window { store : any}
 }
@@ -20,7 +20,7 @@ ReactDOM.render(
     <React.StrictMode>
       <Suspense fallback={<div>Loading...</div>}>
         <h1>Pagination</h1>
-        <App/>
+        <Root/>
       </Suspense>
     </React.StrictMode>
   </RelayEnvironmentProvider>,
