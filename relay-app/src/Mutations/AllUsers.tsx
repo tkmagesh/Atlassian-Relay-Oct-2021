@@ -94,7 +94,12 @@ const AllUsers = () => {
         <div>
             <h1>All Users - [#{data.totalUsers}]</h1>
             <button onClick={onLoginClick}>Login User</button>
-            <button onClick={() => onCreateUserClick()}>Create User</button>
+            <div>
+                <input type="text" placeholder="FirstName"/>
+                <input type="text" placeholder="LastName"/>
+                <input type="text" placeholder="Email"/>
+                <button onClick={() => onCreateUserClick()}>Create User</button>
+            </div>
             <ul>
                 {data.users.map(user => (
                     <li key={user.id}>
