@@ -11,12 +11,13 @@ interface Props {
 const Projects = ({queryRef} : Props) => {
     
     const data = usePreloadedQuery<AppFragmentedQuery.AppFragmentedQuery>(AppFragmentedQuery.default, queryRef)
+    console.log(data);
     return (
         <div>
             <h3>Projects</h3>
             <div>Count : {data.projects.length}</div>
             {data.projects.map(project => 
-            <Suspense fallback={<div>Loading Project...</div>}>
+            <Suspense key={project?.id} fallback={<div>Loading Project...</div>}>
                 <Project data={project}/>
             </Suspense>
             )}

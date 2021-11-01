@@ -46,8 +46,8 @@ fragment Project_project_lg5YC on Project {
   name
   description
   bugs(status: $status) {
-    ...Bug_bug
     id
+    ...Bug_bug
   }
 }
 */
@@ -194,14 +194,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "c7d1a50cb65d2c283b87479f54648fe0",
+    "cacheID": "71b14424eaeee2a57e7357d613a45440",
     "id": null,
     "metadata": {},
     "name": "BugsRefetchQuery",
     "operationKind": "query",
-    "text": "query BugsRefetchQuery(\n  $status: Status = OPEN\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...Project_project_lg5YC\n    id\n  }\n}\n\nfragment Bug_bug on Bug {\n  id\n  title\n  description\n  status\n}\n\nfragment Project_project_lg5YC on Project {\n  id\n  name\n  description\n  bugs(status: $status) {\n    ...Bug_bug\n    id\n  }\n}\n"
+    "text": "query BugsRefetchQuery(\n  $status: Status = OPEN\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ...Project_project_lg5YC\n    id\n  }\n}\n\nfragment Bug_bug on Bug {\n  id\n  title\n  description\n  status\n}\n\nfragment Project_project_lg5YC on Project {\n  id\n  name\n  description\n  bugs(status: $status) {\n    id\n    ...Bug_bug\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '15ca62a31e59fc40b1b30ee849ffc3a9';
+(node as any).hash = '3b897445b658df2d37c8f3104361d05f';
 export default node;

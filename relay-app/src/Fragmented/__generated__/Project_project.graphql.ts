@@ -10,6 +10,7 @@ export type Project_project = {
     readonly name: string;
     readonly description: string;
     readonly bugs: ReadonlyArray<{
+        readonly id: string;
         readonly " $fragmentRefs": FragmentRefs<"Bug_bug">;
     }> | null;
     readonly " $refType": "Project_project";
@@ -22,7 +23,15 @@ export type Project_project$key = {
 
 
 
-const node: ReaderFragment = {
+const node: ReaderFragment = (function(){
+var v0 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+};
+return {
   "argumentDefinitions": [
     {
       "defaultValue": "OPEN",
@@ -43,13 +52,7 @@ const node: ReaderFragment = {
   },
   "name": "Project_project",
   "selections": [
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "id",
-      "storageKey": null
-    },
+    (v0/*: any*/),
     {
       "alias": null,
       "args": null,
@@ -78,6 +81,7 @@ const node: ReaderFragment = {
       "name": "bugs",
       "plural": true,
       "selections": [
+        (v0/*: any*/),
         {
           "args": null,
           "kind": "FragmentSpread",
@@ -90,5 +94,6 @@ const node: ReaderFragment = {
   "type": "Project",
   "abstractKey": null
 };
-(node as any).hash = '15ca62a31e59fc40b1b30ee849ffc3a9';
+})();
+(node as any).hash = '3b897445b658df2d37c8f3104361d05f';
 export default node;

@@ -7,6 +7,7 @@ import Users from './Users';
 import * as AppFragmentedQuery from './__generated__/AppFragmentedQuery.graphql'
 import type { Status } from './__generated__/AppFragmentedQuery.graphql';
 import Projects from './Projects';
+import AllBugs from './AllBugs';
 
 const graphql = require('babel-plugin-relay/macro');
 
@@ -21,6 +22,7 @@ function App() {
         id
         ...Project_project @arguments(status: $status)
       }
+      ...AllBugs_Bug
     }
   `;
   const [queryRef, loadQuery, disposeQuery] = useQueryLoader<AppFragmentedQuery.AppFragmentedQuery>(appQuery);
@@ -37,8 +39,11 @@ function App() {
     {/* <Suspense fallback={<div>Loading users...</div>}>
       {queryRef && <Users queryRef={queryRef}/>}
     </Suspense> */}
-    <Suspense fallback={<div>Loading users...</div>}>
+    {/* <Suspense fallback={<div>Loading users...</div>}>
       {queryRef && <Projects queryRef={queryRef}/>}
+    </Suspense> */}
+    <Suspense fallback={<div>Loading users...</div>}>
+      {queryRef && <AllBugs queryRef={queryRef}/>}
     </Suspense>
    </>
   );

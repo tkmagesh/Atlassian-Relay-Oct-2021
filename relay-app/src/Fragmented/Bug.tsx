@@ -15,6 +15,7 @@ const Bug = ({data} : any) => {
             description
             status
         }`, data)
+    console.log(bug);
     return (
         <div>
             <h4>{bug.title}</h4>

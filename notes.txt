@@ -163,3 +163,32 @@ Render as you Fetch
     usePreloadedQuery
 
 Display the Projects and their bugs
+
+queries
+
+useLazyLoadQuery
+useQueryLoader & usePrefetchQuery
+
+Container Component / Smart Component
+    Communicates the DS
+
+Presentation Component / Dumb Component
+    Presenting the data (received from the parent (Container Component) component)
+
+useFragement
+useRefetchableFragments
+
+@arguments
+@argumentDefinitions
+
+
+Create a component (AllBugs) that displays ALL the bugs from the server
+    Initial retrieval of the bugs has to be done in the Root component (App)
+        (SHOULD not use 'useLazyLoadQuery/useQueryLoader' here)
+        
+    subsequet filtering & manipulatation can happen in the (AllBugs) component
+
+Store Types
+    RecordStoreSelectorProxy (Proxy for the store)
+    RecordProxy (Proxy for the record (object))
+    ConnectionHandler (handling connections)

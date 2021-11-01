@@ -46,6 +46,7 @@ const Project = ({data} : Props) => {
             name
             description
             bugs(status : $status) {
+                id
                 ...Bug_bug
             }
         }
@@ -58,7 +59,7 @@ const Project = ({data} : Props) => {
             <Suspense fallback={<div>Loading Bugs...</div>}>
                 <h4>Bugs</h4>
                 <button onClick={() => { reload({ status: "CLOSED"})}}>Closed</button>
-                {project?.bugs?.map(bug => (<Bug data={bug}/>))}
+                {project?.bugs?.map(bug => (<Bug key={bug?.id} data={bug}/>))}
             </Suspense>
             <hr/>
         </div>
